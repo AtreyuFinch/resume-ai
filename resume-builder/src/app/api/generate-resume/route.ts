@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import OpenAI from 'openai'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { generateText } from 'ai'
 import {
   RESUME_SYSTEM_PROMPT,
   ATS_ANALYSIS_PROMPT,
   buildResumePrompt,
-} from '@/lib/openai/prompts'
+} from '@/lib/ai/prompts'
 import type { ConsolidatedProfile } from '@/types'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_AI_API_KEY,
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,46 +64,38 @@ export async function POST(request: NextRequest) {
       additionalContext
     )
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        { role: 'system', content: RESUME_SYSTEM_PROMPT },
-        { role: 'user', content: prompt },
-      ],
-      response_format: { type: 'json_object' },
+    const { text: rawContent } = await generateText({
+      model: google('gemini-2.5-pro'),
+      system: RESUME_SYSTEM_PROMPT,
+      prompt,
       temperature: 0.3,
-      max_tokens: 4000,
+      maxOutputTokens: 4000,
     })
 
-    const rawContent = completion.choices[0].message.content
     if (!rawContent) {
       throw new Error('No content returned from AI')
     }
 
-    const profile = JSON.parse(rawContent) as ConsolidatedProfile
+    // Strip markdown code fences if present
+    const cleaned = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
+    const profile = JSON.parse(cleaned) as ConsolidatedProfile
 
     // ATS analysis
     let atsScore: number | null = null
     let atsFeedback: string[] | null = null
 
     try {
-      const atsCompletion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: ATS_ANALYSIS_PROMPT },
-          {
-            role: 'user',
-            content: `Analyze this resume: ${JSON.stringify(profile)}`,
-          },
-        ],
-        response_format: { type: 'json_object' },
+      const { text: atsRaw } = await generateText({
+        model: google('gemini-2.0-flash'),
+        system: ATS_ANALYSIS_PROMPT,
+        prompt: `Analyze this resume: ${JSON.stringify(profile)}`,
         temperature: 0.1,
-        max_tokens: 500,
+        maxOutputTokens: 500,
       })
 
-      const atsRaw = atsCompletion.choices[0].message.content
       if (atsRaw) {
-        const atsData = JSON.parse(atsRaw)
+        const atsClean = atsRaw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
+        const atsData = JSON.parse(atsClean)
         atsScore = atsData.score
         atsFeedback = atsData.feedback
       }

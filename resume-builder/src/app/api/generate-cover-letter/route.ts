@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import OpenAI from 'openai'
-import { buildCoverLetterPrompt } from '@/lib/openai/prompts'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { generateText } from 'ai'
+import { buildCoverLetterPrompt } from '@/lib/ai/prompts'
 import type { ConsolidatedProfile } from '@/types'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_AI_API_KEY,
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,21 +80,14 @@ export async function POST(request: NextRequest) {
       type: type === 'email_response' ? 'email_response' : 'cover_letter',
     })
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are an expert professional writer specializing in career documents. Write compelling, authentic, and tailored career communications.',
-        },
-        { role: 'user', content: prompt },
-      ],
+    const { text: content } = await generateText({
+      model: google('gemini-2.5-pro'),
+      system:
+        'You are an expert professional writer specializing in career documents. Write compelling, authentic, and tailored career communications.',
+      prompt,
       temperature: 0.7,
-      max_tokens: 1000,
+      maxOutputTokens: 1000,
     })
-
-    const content = completion.choices[0].message.content ?? ''
 
     // Save to application
     if (applicationId) {
