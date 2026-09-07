@@ -1,0 +1,5 @@
+resume-builder/node_modules/
+resume-builder/.next/
+resume-builder/.env.local
+.DS_Store
+*.log
