@@ -8,8 +8,8 @@ function getSupabaseUrl() {
 
 function getSupabaseKey() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (key && key.length > 20) return key
-  return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder'
+  if (key && key.length > 10) return key
+  return 'placeholder-anon-key'
 }
 
 export function createClient() {
