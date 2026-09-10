@@ -41,13 +41,12 @@ npm install
 
 ### 4. Configure environment
 
-Copy `.env.local` and fill in your values:
+Copy `.env.example` to `.env.local` and fill in your values (see `.env.example`):
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-OPENAI_API_KEY=sk-...
+GOOGLE_AI_API_KEY=your-gemini-api-key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
