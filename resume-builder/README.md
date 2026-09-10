@@ -5,7 +5,7 @@ An AI-powered resume builder that synthesizes all your career materials into a s
 ## Features
 
 - **Multi-source ingestion** — Upload PDFs, DOCX, TXT files (resumes, recommendation letters, work samples) and add LinkedIn/portfolio URLs
-- **AI document analysis** — GPT-4o extracts and consolidates every experience, skill, and achievement
+- **AI document analysis** — Gemini extracts and consolidates every experience, skill, and achievement
 - **ATS-optimized resume** — Generates a scored, keyword-rich resume with ATS feedback
 - **Tailored cover letters** — Paste a job description or email and get a personalized cover letter in seconds
 - **Email responses** — Generate well-crafted professional email responses
@@ -16,7 +16,7 @@ An AI-powered resume builder that synthesizes all your career materials into a s
 - **Framework**: Next.js 15 (App Router, TypeScript)
 - **UI**: Tailwind CSS v4 + custom shadcn-style components
 - **Auth & Database**: Supabase (Auth, PostgreSQL, Storage)
-- **AI**: OpenAI GPT-4o via `openai` SDK
+- **AI**: Google Gemini via `@ai-sdk/google`
 - **Document Parsing**: pdf-parse, mammoth
 - **URL Scraping**: cheerio
 
@@ -35,9 +35,9 @@ npm install
 2. Run the SQL in `supabase-schema.sql` in the Supabase SQL editor
 3. Copy your project URL, anon key, and service role key
 
-### 3. Set up OpenAI
+### 3. Set up Google Gemini
 
-1. Get an API key from [platform.openai.com](https://platform.openai.com)
+1. Get an API key from [Google AI Studio](https://aistudio.google.com/apikey)
 
 ### 4. Configure environment
 
@@ -83,7 +83,7 @@ src/
 │       ├── upload/           # File upload to Supabase Storage
 │       ├── parse-document/   # PDF/DOCX text extraction
 │       ├── scrape-url/       # URL content extraction
-│       ├── generate-resume/  # GPT-4o resume synthesis
+│       ├── generate-resume/  # Gemini resume synthesis
 │       └── generate-cover-letter/  # Cover letter & email generation
 ├── components/
 │   ├── ui/                   # Button, Card, Input, etc.
@@ -92,7 +92,7 @@ src/
 │   └── layout/               # Sidebar, Header
 ├── lib/
 │   ├── supabase/             # Client, server, middleware
-│   ├── openai/               # Prompts
+│   ├── ai/                   # Prompts
 │   └── parsers/              # Document parsing utilities
 └── types/                    # TypeScript types
 ```
